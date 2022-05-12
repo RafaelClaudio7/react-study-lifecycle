@@ -5,13 +5,14 @@ import { Component } from 'react';
 import {loadPosts} from '../../utils/load-posts'
 import { Posts } from '../../Components/Posts';
 import { Button } from '../../Components/Button';
+import { TextInput } from '../../Components/TextInput';
 
 export class Home extends Component {
   state = {
     posts: [],
     allPosts: [],
     page: 0,
-    postsPerPage: 12
+    postsPerPage: 4
     };
   
   timeoutUpdate = null;
@@ -47,23 +48,57 @@ export class Home extends Component {
     this.setState({posts, page:nextPage})
   }
 
+  handleChange = (e) => {
+    const {value} = e.target;
+    this.setState({ searchValue: value});
+  }
 
+  /*
   componentDidUpdate() {
     
   }
 
   componentWillUnmount() {
     
-  }
+  }*/
 
   
   render () {
-  const { posts, page, postsPerPage, allPosts } = this.state;
+  const { posts, page, postsPerPage, allPosts, searchValue } = this.state;
   const noMorePosts = page + postsPerPage >= allPosts.length;
+
+  const filteredPosts = !!searchValue ? 
+  allPosts.filter(post => {
+    return post.title.toLowerCase().includes(searchValue.toLowerCase());
+  })
+  : posts;
+
   return (
     <section className='container'>
-      <Posts posts={posts}/>
-      <Button disabled={noMorePosts} text="Load more posts" onClick={this.loadMorePosts}/>
+      {!!searchValue && (
+        <>
+            <h1>Search value: {searchValue}</h1> <br/> <br/>
+        </>
+      )}
+      
+      <TextInput searchValue={searchValue} handleChange={this.handleChange}/>
+      <br/> <br/> <br/> <hr/> <br />
+      
+      {filteredPosts.length > 0 && (
+        <Posts posts={filteredPosts}/>
+      )}
+
+      {filteredPosts.length === 0 && (
+        <p style={{color: "red"}}>Não existem posts com essa(s) palavra(s)</p>
+      )}
+      
+
+      {!searchValue && (
+        <>
+            <Button disabled={noMorePosts} text="Load more posts" onClick={this.loadMorePosts}/>
+        </>
+      )}
+      
     </section>
   );
   }
